@@ -1,5 +1,6 @@
 import 'package:meta/meta.dart';
 
+import 'package:cleanflutterapp/domain/helpers/helper.dart';
 import 'package:cleanflutterapp/domain/usecases/usecases.dart';
 import '../http/htpp.dart';
 
@@ -14,7 +15,13 @@ class RemoteAuthentication {
 
   Future<void> auth(AuthenticationParams params) async {
     final body = RemoteAuthenticationParams.fromDomain(params).toJson();
-    await httpClient.request(url: url, method: 'post', body: body);
+    try {
+      await httpClient.request(url: url, method: 'post', body: body);
+    } on HttpError catch (error) {
+      throw error == HttpError.unauthorized
+          ? DomainError.invalidCredentials
+          : DomainError.unexpected;
+    }
   }
 }
 
