@@ -1,39 +1,11 @@
-import 'dart:convert';
-
-import 'package:cleanflutterapp/data/http/htpp.dart';
+import 'package:cleanflutterapp/data/http/http_error.dart';
+import 'package:cleanflutterapp/infra/http/http.dart';
 import 'package:faker/faker.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart';
 import 'package:mockito/mockito.dart';
-import 'package:meta/meta.dart';
 
 class ClientSpy extends Mock implements Client {}
-
-class HttpAdapter implements HttpClient {
-  final Client client;
-
-  HttpAdapter(this.client);
-
-  @override
-  Future<Map> request({
-    @required String url,
-    @required String method,
-    Map body,
-  }) async {
-    final headers = {
-      'Content-Type': 'application/json',
-      'accept': 'application/json'
-    };
-    final jsonBody = body != null ? jsonEncode(body) : null;
-    final response =
-        await client.post(Uri.parse(url), headers: headers, body: jsonBody);
-    if (response.statusCode == 200) {
-      return response.body.isEmpty ? null : jsonDecode(response.body);
-    } else {
-      return null;
-    }
-  }
-}
 
 void main() {
   ClientSpy client;
@@ -46,6 +18,17 @@ void main() {
     url = faker.internet.httpUrl();
   });
 
+  group('shared', () {
+    test(
+      'should throw server error if invalid mehos is provider',
+      () async {
+        final future = sut.request(url: url, method: 'invalid method');
+
+        expect(future, throwsA(HttpError.serverError));
+      },
+    );
+  });
+
   group('post', () {
     PostExpectation mockRequest() => when(
         client.post(any, headers: anyNamed('headers'), body: anyNamed('body')));
@@ -53,6 +36,10 @@ void main() {
     void mockResponse(int statusCode,
         {String body = '{"any_key":"any_value"}'}) {
       mockRequest().thenAnswer((_) async => Response(body, statusCode));
+    }
+
+    void mockError() {
+      mockRequest().thenThrow(Exception());
     }
 
     setUp(() {
@@ -124,6 +111,59 @@ void main() {
         mockResponse(204);
         final response = await sut.request(url: url, method: 'post');
         expect(response, null);
+      },
+    );
+
+    test(
+      'should return badRequestError if post returns 400',
+      () async {
+        mockResponse(400);
+        final future = sut.request(url: url, method: 'post');
+        expect(future, throwsA(HttpError.badRequest));
+      },
+    );
+    test(
+      'should return badRequestError if post returns 400',
+      () async {
+        mockResponse(400, body: '');
+        final future = sut.request(url: url, method: 'post');
+        expect(future, throwsA(HttpError.badRequest));
+      },
+    );
+
+    test(
+      'should return UnauthorizeError if post returns 401',
+      () async {
+        mockResponse(401, body: '');
+        final future = sut.request(url: url, method: 'post');
+        expect(future, throwsA(HttpError.unauthorized));
+      },
+    );
+
+    test(
+      'should return Forbidden if post returns 403',
+      () async {
+        mockResponse(403);
+        final future = sut.request(url: url, method: 'post');
+        expect(future, throwsA(HttpError.forbidden));
+      },
+    );
+
+    test(
+      'should return not Found if post returns 404',
+      () async {
+        mockResponse(404);
+        final future = sut.request(url: url, method: 'post');
+        expect(future, throwsA(HttpError.notFound));
+      },
+    );
+
+    test(
+      'should return not Found if post returns throws',
+      () async {
+        mockError();
+        final future = sut.request(url: url, method: 'post');
+        expect(future, throwsA(HttpError.serverError));
       },
     );
   });
