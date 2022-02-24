@@ -4,16 +4,19 @@
     // Para obter mais informações, acesse: https://go.microsoft.com/fwlink/?linkid=830387
     "version": "0.2.0",
     "configurations": [
+        
         {
-            "name": "cleanflutterapp",
-            "request": "launch",
-            "type": "dart"
-        },
-        {
-            "name": "cleanflutterapp (profile mode)",
+            "name": "All Tests",
             "request": "launch",
             "type": "dart",
-            "flutterMode": "profile"
+            "program": "test/"
+
+        },
+        {
+            "name": "run app",
+            "request": "launch",
+            "type": "dart",
+            "program": "lib/main/main.dart"
         }
     ]
 }
