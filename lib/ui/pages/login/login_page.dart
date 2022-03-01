@@ -1,8 +1,11 @@
 import 'package:cleanflutterapp/ui/components/components.dart';
+import 'package:cleanflutterapp/ui/pages/pages.dart';
 import 'package:flutter/material.dart';
 
 class LoginPage extends StatelessWidget {
-  const LoginPage({Key key}) : super(key: key);
+  final LoginPresenter presenter;
+
+  const LoginPage({Key key, this.presenter}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -17,16 +20,22 @@ class LoginPage extends StatelessWidget {
             child: Form(
                 child: Column(
               children: [
-                TextFormField(
-                  decoration: InputDecoration(
-                    labelText: 'Email',
-                    icon: Icon(
-                      Icons.email,
-                      color: Theme.of(context).primaryColorLight,
-                    ),
-                  ),
-                  keyboardType: TextInputType.emailAddress,
-                ),
+                StreamBuilder<String>(
+                    stream: presenter.emailErrorStream,
+                    builder: (context, snapshot) {
+                      return TextFormField(
+                        decoration: InputDecoration(
+                          labelText: 'Email',
+                          icon: Icon(
+                            Icons.email,
+                            color: Theme.of(context).primaryColorLight,
+                          ),
+                          errorText: snapshot.data,
+                        ),
+                        keyboardType: TextInputType.emailAddress,
+                        onChanged: (e) => presenter.validateEmail(e),
+                      );
+                    }),
                 Padding(
                   padding: const EdgeInsets.only(top: 8, bottom: 32),
                   child: TextFormField(
@@ -36,6 +45,7 @@ class LoginPage extends StatelessWidget {
                           Icons.lock,
                           color: Theme.of(context).primaryColorLight,
                         )),
+                    onChanged: (e) => presenter.validatePassword(e),
                     obscureText: true,
                   ),
                 ),
