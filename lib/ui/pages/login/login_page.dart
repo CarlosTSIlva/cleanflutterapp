@@ -21,7 +21,7 @@ class LoginPage extends StatelessWidget {
                 child: Column(
               children: [
                 StreamBuilder<String>(
-                    stream: presenter.emailErrorStream,
+                    stream: const Stream.empty() ?? presenter.emailErrorStream,
                     builder: (context, snapshot) {
                       return TextFormField(
                         decoration: InputDecoration(
@@ -30,7 +30,9 @@ class LoginPage extends StatelessWidget {
                             Icons.email,
                             color: Theme.of(context).primaryColorLight,
                           ),
-                          errorText: snapshot.data,
+                          errorText: snapshot.data?.isEmpty == true
+                              ? null
+                              : snapshot.data,
                         ),
                         keyboardType: TextInputType.emailAddress,
                         onChanged: (e) => presenter.validateEmail(e),
@@ -38,21 +40,33 @@ class LoginPage extends StatelessWidget {
                     }),
                 Padding(
                   padding: const EdgeInsets.only(top: 8, bottom: 32),
-                  child: TextFormField(
-                    decoration: InputDecoration(
-                        labelText: 'Senha',
-                        icon: Icon(
-                          Icons.lock,
-                          color: Theme.of(context).primaryColorLight,
-                        )),
-                    onChanged: (e) => presenter.validatePassword(e),
-                    obscureText: true,
-                  ),
+                  child: StreamBuilder<String>(
+                      stream:
+                          const Stream.empty() ?? presenter.passwordErrorStream,
+                      builder: (context, snapshot) {
+                        return TextFormField(
+                          decoration: InputDecoration(
+                              labelText: 'Senha',
+                              icon: Icon(
+                                Icons.lock,
+                                color: Theme.of(context).primaryColorLight,
+                              ),
+                              errorText: snapshot.data?.isEmpty == true
+                                  ? null
+                                  : snapshot.data),
+                          onChanged: (e) => presenter.validatePassword(e),
+                          obscureText: true,
+                        );
+                      }),
                 ),
-                ElevatedButton(
-                  onPressed: null,
-                  child: Text('Entrar'.toUpperCase()),
-                ),
+                StreamBuilder<bool>(
+                    stream: const Stream.empty() ?? presenter.isFormValidStream,
+                    builder: (context, snapshot) {
+                      return ElevatedButton(
+                        onPressed: snapshot.data == true ? () {} : null,
+                        child: Text('Entrar'.toUpperCase()),
+                      );
+                    }),
                 TextButton.icon(
                     onPressed: () {},
                     icon: const Icon(Icons.person),
