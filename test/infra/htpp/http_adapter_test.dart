@@ -8,13 +8,13 @@ import 'package:mockito/mockito.dart';
 class ClientSpy extends Mock implements Client {}
 
 void main() {
-  ClientSpy client;
-  HttpAdapter sut;
-  String url;
+  ClientSpy? client;
+  HttpAdapter? sut;
+  String? url;
 
   setUp(() {
     client = ClientSpy();
-    sut = HttpAdapter(client);
+    sut = HttpAdapter(client!);
     url = faker.internet.httpUrl();
   });
 
@@ -22,7 +22,7 @@ void main() {
     test(
       'should throw server error if invalid mehos is provider',
       () async {
-        final future = sut.request(url: url, method: 'invalid method');
+        final future = sut!.request(url: url!, method: 'invalid method');
 
         expect(future, throwsA(HttpError.serverError));
       },
@@ -30,8 +30,8 @@ void main() {
   });
 
   group('post', () {
-    PostExpectation mockRequest() => when(
-        client.post(any, headers: anyNamed('headers'), body: anyNamed('body')));
+    PostExpectation mockRequest() => when(client!
+        .post(null, headers: anyNamed('headers'), body: anyNamed('body')));
 
     void mockResponse(int statusCode,
         {String body = '{"any_key":"any_value"}'}) {
@@ -48,13 +48,13 @@ void main() {
     test(
       'should call post with correct values',
       () async {
-        await sut
-            .request(url: url, method: 'post', body: {"any_key": "any_value"});
+        await sut!
+            .request(url: url!, method: 'post', body: {"any_key": "any_value"});
 
         verify(
-          client.post(
+          client!.post(
             Uri.parse(
-              url,
+              url!,
             ),
             headers: {
               'Content-Type': 'application/json',
@@ -68,10 +68,10 @@ void main() {
     test(
       'should call post with without body',
       () async {
-        await sut.request(url: url, method: 'post');
+        await sut!.request(url: url!, method: 'post');
 
         verify(
-          client.post(
+          client!.post(
             any,
             headers: anyNamed('headers'),
           ),
@@ -82,7 +82,7 @@ void main() {
     test(
       'should return data if post returns 200',
       () async {
-        final response = await sut.request(url: url, method: 'post');
+        final response = await sut!.request(url: url!, method: 'post');
         expect(response, {"any_key": "any_value"});
       },
     );
@@ -91,7 +91,7 @@ void main() {
       'should return null if post returns 200 with no data',
       () async {
         mockResponse(200, body: '');
-        final response = await sut.request(url: url, method: 'post');
+        final response = await sut!.request(url: url!, method: 'post');
         expect(response, null);
       },
     );
@@ -100,7 +100,7 @@ void main() {
       'should return null if post returns 204',
       () async {
         mockResponse(204, body: '');
-        final response = await sut.request(url: url, method: 'post');
+        final response = await sut!.request(url: url!, method: 'post');
         expect(response, null);
       },
     );
@@ -109,7 +109,7 @@ void main() {
       'should return null if post returns 204 with data',
       () async {
         mockResponse(204);
-        final response = await sut.request(url: url, method: 'post');
+        final response = await sut!.request(url: url!, method: 'post');
         expect(response, null);
       },
     );
@@ -118,7 +118,7 @@ void main() {
       'should return badRequestError if post returns 400',
       () async {
         mockResponse(400);
-        final future = sut.request(url: url, method: 'post');
+        final future = sut!.request(url: url!, method: 'post');
         expect(future, throwsA(HttpError.badRequest));
       },
     );
@@ -126,7 +126,7 @@ void main() {
       'should return badRequestError if post returns 400',
       () async {
         mockResponse(400, body: '');
-        final future = sut.request(url: url, method: 'post');
+        final future = sut!.request(url: url!, method: 'post');
         expect(future, throwsA(HttpError.badRequest));
       },
     );
@@ -135,7 +135,7 @@ void main() {
       'should return UnauthorizeError if post returns 401',
       () async {
         mockResponse(401, body: '');
-        final future = sut.request(url: url, method: 'post');
+        final future = sut!.request(url: url!, method: 'post');
         expect(future, throwsA(HttpError.unauthorized));
       },
     );
@@ -144,7 +144,7 @@ void main() {
       'should return Forbidden if post returns 403',
       () async {
         mockResponse(403);
-        final future = sut.request(url: url, method: 'post');
+        final future = sut!.request(url: url!, method: 'post');
         expect(future, throwsA(HttpError.forbidden));
       },
     );
@@ -153,7 +153,7 @@ void main() {
       'should return not Found if post returns 404',
       () async {
         mockResponse(404);
-        final future = sut.request(url: url, method: 'post');
+        final future = sut!.request(url: url!, method: 'post');
         expect(future, throwsA(HttpError.notFound));
       },
     );
@@ -162,7 +162,7 @@ void main() {
       'should return not Found if post returns throws',
       () async {
         mockError();
-        final future = sut.request(url: url, method: 'post');
+        final future = sut!.request(url: url!, method: 'post');
         expect(future, throwsA(HttpError.serverError));
       },
     );

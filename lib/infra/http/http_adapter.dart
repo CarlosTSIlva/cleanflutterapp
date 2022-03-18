@@ -3,7 +3,6 @@ import 'dart:convert';
 import 'package:cleanflutterapp/data/http/http_client.dart';
 import 'package:cleanflutterapp/data/http/http_error.dart';
 import 'package:http/http.dart';
-import 'package:meta/meta.dart';
 
 class HttpAdapter implements HttpClient {
   final Client client;
@@ -12,9 +11,9 @@ class HttpAdapter implements HttpClient {
 
   @override
   Future<Map> request({
-    @required String url,
-    @required String method,
-    Map body,
+    required String? url,
+    required String? method,
+    Map? body,
   }) async {
     final headers = {
       'Content-Type': 'application/json',
@@ -24,16 +23,16 @@ class HttpAdapter implements HttpClient {
     var response = Response('', 500);
     try {
       if (method == 'post') {
-        response =
-            await client.post(Uri.parse(url), headers: headers, body: jsonBody);
+        response = await client.post(Uri.parse(url!),
+            headers: headers, body: jsonBody);
       }
     } catch (error) {
       throw HttpError.serverError;
     }
-    return _handleResponse(response);
+    return _handleResponse(response)!;
   }
 
-  Map _handleResponse(Response response) {
+  Map? _handleResponse(Response response) {
     if (response.statusCode == 200) {
       return response.body.isEmpty ? null : jsonDecode(response.body);
     } else if (response.statusCode == 204) {

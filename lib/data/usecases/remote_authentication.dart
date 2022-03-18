@@ -1,6 +1,5 @@
 import 'package:cleanflutterapp/data/models/models.dart';
 import 'package:cleanflutterapp/domain/entities/account_entity.dart';
-import 'package:meta/meta.dart';
 
 import 'package:cleanflutterapp/domain/helpers/helper.dart';
 import 'package:cleanflutterapp/domain/usecases/usecases.dart';
@@ -11,8 +10,8 @@ class RemoteAuthentication implements Authentication {
   final String url;
 
   RemoteAuthentication({
-    @required this.httpClient,
-    @required this.url,
+    required this.httpClient,
+    required this.url,
   });
 
   @override
@@ -33,7 +32,7 @@ class RemoteAuthentication implements Authentication {
 class RemoteAuthenticationParams {
   final String email;
   final String password;
-  RemoteAuthenticationParams({@required this.email, @required this.password});
+  RemoteAuthenticationParams({required this.email, required this.password});
 
   factory RemoteAuthenticationParams.fromDomain(AuthenticationParams entity) {
     return RemoteAuthenticationParams(
